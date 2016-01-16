@@ -7,6 +7,7 @@ const int WINDOW_HALF_HEIGHT = WINDOW_HEIGHT / 2;
 const int WINDOW_HALF_WIDTH = WINDOW_WIDTH / 2;
 const int DEPTH = 32;
 const int NUM_STARS = 720;
+const int FRAMES_PER_SECOND = 60;
 
 struct star {
   int x;
@@ -28,11 +29,19 @@ int main() {
   }
 
   sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "SFML Starfield");
-  sf::Vertex vertex;
-  sf::VertexArray vertexArray(sf::Points, NUM_STARS);
-  sf::CircleShape circleShape; 
+  window.setFramerateLimit(FRAMES_PER_SECOND);
+
+  sf::Texture texture;
+
+  if (!texture.loadFromFile("res/sprites/star_flare_default.png")) {
+    return 1;
+  }
+
+  sf::Sprite sprite;
+
+  sprite.setTexture(texture);
+  sprite.setOrigin(256, 256);
   
-  window.setFramerateLimit(60);
   window.clear(sf::Color::Black);
   window.display();
 
@@ -47,7 +56,6 @@ int main() {
     }
 
     window.clear(sf::Color::Black);
-    vertexArray.clear();
     
     for (int i = 0; i < NUM_STARS; i++) {
       stars[i].z -= 0.1;
@@ -63,15 +71,17 @@ int main() {
       float yPos = (stars[i].y * k) + WINDOW_HALF_HEIGHT;
 
       if (xPos >= 0 && xPos < WINDOW_WIDTH && yPos >= 0 && yPos < WINDOW_HEIGHT) {
-	vertex.position = sf::Vector2f(xPos, yPos);
-	vertexArray.append(vertex);	
-       }
+	sprite.setPosition(sf::Vector2f(xPos, yPos));
+	
+	sprite.setScale(sf::Vector2f((float)(1 - stars[i].z / DEPTH) * .03,
+				     (float)(1 - stars[i].z / DEPTH) * .03));
+	window.draw(sprite);
+      }
       
     }
-
-    window.draw(vertexArray);
+    
     window.display();
   }
- 
+  
   return 0;
 }
